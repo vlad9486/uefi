@@ -1,0 +1,10 @@
+[package]
+name = "uefi"
+version = "0.0.1"
+authors = ["Vladislav Melnik <vlad9486@gmail.com>"]
+
+[lib]
+name = "uefi"
+crate-type = ["rlib"]
+
+[dependencies]
