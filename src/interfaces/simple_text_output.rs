@@ -7,7 +7,6 @@ use ::common::Uint;
 use super::EfiResult;
 
 use ::tools::result;
-use ::tools::utf8_to_utf16;
 
 pub const PROTOCOL: Guid =
     Guid(0x387477c2, 0x69c7, 0x11d2, [0x8e, 0x39, 0x0, 0xa0, 0xc9, 0x69, 0x72, 0x3b]);
@@ -73,13 +72,11 @@ impl I {
     pub fn reset(&self, extended_verification: Bool) -> EfiResult<()> {
         result(((*self).reset)(self as *const I, extended_verification), ())
     }
-    pub fn output_string(&self, string: &str) -> EfiResult<()> {
-        let utf16 = utf8_to_utf16(string);
-        result(((*self).output_string)(self as *const I, &utf16[0]), ())
+    pub fn output_string(&self, string: &[Char16]) -> EfiResult<()> {
+        result(((*self).output_string)(self as *const I, &string[0]), ())
     }
-    pub fn test_string(&self, string: &str) -> EfiResult<()> {
-        let utf16 = utf8_to_utf16(string);
-        result(((*self).test_string)(self as *const I, &utf16[0]), ())
+    pub fn test_string(&self, string: &[Char16]) -> EfiResult<()> {
+        result(((*self).test_string)(self as *const I, &string[0]), ())
     }
 
     pub fn query_mode(&self, mode_number: Uint) -> EfiResult<(Uint, Uint)> {

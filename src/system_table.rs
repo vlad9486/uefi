@@ -13,7 +13,6 @@ use ::configuration_table::ConfigurationTable;
 
 use core::slice::from_raw_parts;
 
-use ::tools::utf16_to_utf8;
 use ::tools::create_utf16;
 
 pub const SIGNATURE: u64 = 0x5453595320494249;
@@ -42,8 +41,8 @@ impl SystemTable {
     pub fn get_header(&self) -> Header {
         self.header
     }
-    pub fn get_firmware_vendor(&self) -> &'static str {
-        utf16_to_utf8(create_utf16(self.firmware_vendor))
+    pub fn get_firmware_vendor(&self) -> &'static [Char16] {
+        create_utf16(self.firmware_vendor)
     }
     pub fn get_firmware_revision(&self) -> u32 {
         self.firmware_revision
