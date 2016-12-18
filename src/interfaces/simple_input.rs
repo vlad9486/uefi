@@ -17,13 +17,12 @@ pub struct InputKey {
     pub unicode_char: Char16
 }
 
-#[derive(Copy, Clone)]
 pub struct I {
-    reset: extern fn (
+    reset: extern "win64" fn (
         /* in */ this: *const I,
         /* in */ extended_verification: Bool
     ) -> Status,
-    read_key_stroke: extern fn (
+    read_key_stroke: extern "win64" fn (
         /* in */ this: *const I,
         /* out */ key: *mut InputKey
     ) -> Status,

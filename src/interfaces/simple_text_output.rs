@@ -21,46 +21,45 @@ pub struct SimpleTextOutputMode {
     pub cursor_visible: Bool
 }
 
-#[derive(Copy, Clone)]
 pub struct I {
-    reset: extern fn (
+    reset: extern "win64" fn (
         /* in */ this: *const I,
         /* in */ extended_verification: Bool
     ) -> Status,
 
-    output_string: extern fn (
+    output_string: extern "win64" fn (
         /* in */ this: *const I,
         /* in */ string: *const Char16
     ) -> Status,
-    test_string: extern fn (
+    test_string: extern "win64" fn (
         /* in */ this: *const I,
         /* in */ string: *const Char16
     ) -> Status,
 
-    query_mode: extern fn (
+    query_mode: extern "win64" fn (
         /* in */ this: *const I,
         /* in */ mode_number: Uint,
         /* out */ columns: *mut Uint,
         /* out */ rows: *mut Uint
     ) -> Status,
-    set_mode: extern fn (
+    set_mode: extern "win64" fn (
         /* in */ this: *const I,
         /* in */ mode_number: Uint
     ) -> Status,
-    set_attribute: extern fn (
+    set_attribute: extern "win64" fn (
         /* in */ this: *const I,
         /* in */ attribute: Uint
     ) -> Status,
 
-    clear_screen: extern fn (
+    clear_screen: extern "win64" fn (
         /* in */ this: *const I
     ) -> Status,
-    set_cursor_position: extern fn (
+    set_cursor_position: extern "win64" fn (
         /* in */ this: *const I,
         /* in */ column: Uint,
         /* in */ row: Uint
     ) -> Status,
-    enable_cursor: extern fn (
+    enable_cursor: extern "win64" fn (
         /* in */ this: *const I,
         /* in */ enable: Bool
     ) -> Status,
@@ -73,10 +72,10 @@ impl I {
         result(((*self).reset)(self as *const I, extended_verification), ())
     }
     pub fn output_string(&self, string: &[Char16]) -> EfiResult<()> {
-        result(((*self).output_string)(self as *const I, &string[0]), ())
+        result(((*self).output_string)(self as *const I, string.as_ptr()), ())
     }
     pub fn test_string(&self, string: &[Char16]) -> EfiResult<()> {
-        result(((*self).test_string)(self as *const I, &string[0]), ())
+        result(((*self).test_string)(self as *const I, string.as_ptr()), ())
     }
 
     pub fn query_mode(&self, mode_number: Uint) -> EfiResult<(Uint, Uint)> {
