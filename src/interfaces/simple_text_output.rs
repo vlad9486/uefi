@@ -68,19 +68,61 @@ pub struct I {
 }
 
 impl I {
-    pub fn reset(&self, extended_verification: Bool) -> EfiResult<()> {
-        result(((*self).reset)(self as *const I, extended_verification), ())
+    pub fn reset(&self, extended_verification: bool) -> EfiResult<()> {
+        let reset = (*self).reset;
+        let status = reset(self as *const I, if extended_verification { 1 } else { 0 });
+        result(status, ())
     }
     pub fn output_string(&self, string: &[Char16]) -> EfiResult<()> {
-        result(((*self).output_string)(self as *const I, string.as_ptr()), ())
+        let output_string = (*self).output_string;
+        let c_str = string.as_ptr();
+        let status = output_string(self as *const I, c_str);
+        result(status, ())
     }
     pub fn test_string(&self, string: &[Char16]) -> EfiResult<()> {
-        result(((*self).test_string)(self as *const I, string.as_ptr()), ())
+        let test_string = (*self).test_string;
+        let c_str = string.as_ptr();
+        let status = test_string(self as *const I, c_str);
+        result(status, ())
     }
 
     pub fn query_mode(&self, mode_number: Uint) -> EfiResult<(Uint, Uint)> {
+        let query_mode = (*self).query_mode;
         let mut columns = 0;
         let mut rows = 0;
-        result(((*self).query_mode)(self as *const I, mode_number, &mut columns, &mut rows), (columns, rows))
+        let status = query_mode(self as *const I, mode_number, &mut columns, &mut rows);
+        result(status, (columns, rows))
+    }
+    pub fn set_mode(&self, mode_number: Uint) -> EfiResult<()> {
+        let set_mode = (*self).set_mode;
+        let status = set_mode(self as *const I, mode_number);
+        result(status, ())
+    }
+    pub fn set_attribute(&self, attribute: Uint) -> EfiResult<()> {
+        let set_attribute = (*self).set_attribute;
+        let status = set_attribute(self as *const I, attribute);
+        result(status, ())
+    }
+
+    pub fn clear_screen(&self) -> EfiResult<()> {
+        let clear_screen = (*self).clear_screen;
+        let status = clear_screen(self as *const I);
+        result(status, ())
+    }
+    pub fn set_cursor_position(&self, column: Uint, row: Uint) -> EfiResult<()> {
+        let set_cursor_position = (*self).set_cursor_position;
+        let status = set_cursor_position(self as *const I, column, row);
+        result(status, ())
+    }
+    pub fn enable_cursor(&self, enable: bool) -> EfiResult<()> {
+        let enable_cursor = (*self).enable_cursor;
+        let status = enable_cursor(self as *const I, if enable { 1 } else { 0 });
+        result(status, ())
+    }
+
+    pub fn get_mode(&self) -> SimpleTextOutputMode {
+        unsafe {
+            *self.mode
+        }
     }
 }
