@@ -8,3 +8,4 @@ name = "uefi"
 crate-type = ["rlib"]
 
 [dependencies]
+bitflags = "*"

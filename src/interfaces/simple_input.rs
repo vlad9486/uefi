@@ -26,7 +26,8 @@ pub struct I {
         /* in */ this: *const I,
         /* out */ key: *mut InputKey
     ) -> Status,
-    wait_for_key: Event,
+
+    wait_for_key: Event
 }
 
 impl I {
