@@ -3,6 +3,10 @@ use ::common::Header;
 pub const SIGNATURE: u64 = 0x56524553544e5552;
 
 pub struct RuntimeServices {
+    raw: &'static RuntimeServicesRaw
+}
+
+pub struct RuntimeServicesRaw {
     header: Header,
 
     get_time: extern "win64" fn () -> (),
@@ -27,6 +31,18 @@ pub struct RuntimeServices {
 
 impl RuntimeServices {
     pub fn get_header(&self) -> Header {
-        self.header
+        self.raw.header
+    }
+}
+
+pub trait RuntimeServicesFromRaw {
+    fn from_raw(raw: &'static RuntimeServicesRaw) -> Self;
+}
+
+impl RuntimeServicesFromRaw for RuntimeServices {
+    fn from_raw(raw: &'static RuntimeServicesRaw) -> Self {
+        RuntimeServices {
+            raw: raw
+        }
     }
 }

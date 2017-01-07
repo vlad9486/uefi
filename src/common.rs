@@ -1,3 +1,4 @@
+use core::ops::Deref;
 
 // FIXME
 pub type Uint = u64;
@@ -19,9 +20,4 @@ pub struct Header {
     pub size: u32,
     pub crc32: u32,
     pub reserved: u32
-}
-
-pub struct Interface<T> where T: 'static {
-    pub handle: Handle,
-    pub implementation: &'static T
 }

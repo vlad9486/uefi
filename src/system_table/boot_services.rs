@@ -8,13 +8,18 @@ use ::common::Registration;
 use ::interfaces::EfiResult;
 use ::interfaces::ProtocolImplementation;
 
-use ::core::slice;
+use ::tools::EfiObject;
+use ::tools::EfiObjectFromParts;
 
-pub type Tpl = Uint;
+use core::slice;
 
 pub const SIGNATURE: u64 = 0x56524553544f4f42;
 
 pub struct BootServices {
+    raw: &'static BootServicesRaw
+}
+
+pub struct BootServicesRaw {
     header: Header,
 
     raise_tpl: extern "win64" fn (
@@ -87,6 +92,8 @@ pub struct BootServices {
     create_event_ex: extern "win64" fn () -> ()
 }
 
+pub type Tpl = Uint;
+
 pub enum SearchKey {
     AllHandles,
     ByRegisterNotify(Registration),
@@ -95,11 +102,11 @@ pub enum SearchKey {
 
 impl BootServices {
     pub fn get_header(&self) -> Header {
-        self.header
+        self.raw.header
     }
 
-    pub fn handle_protocol<T: ProtocolImplementation>(&self, handle: Handle) -> EfiResult<&'static T> {
-        let handle_protocol = self.handle_protocol;
+    pub fn handle_protocol<T: ProtocolImplementation + 'static>(&self, handle: Handle) -> EfiResult<EfiObject<T>> {
+        let handle_protocol = self.raw.handle_protocol;
         let mut implementation: *const () = 0 as _;
         let (guid, _) = T::get_guid();
         let status = handle_protocol(handle, &guid, &mut implementation);
@@ -107,14 +114,14 @@ impl BootServices {
             let implementation = unsafe {
                 &*(implementation as *const T)
             };
-            Ok(implementation)
+            Ok(EfiObject::from_parts(handle, implementation))
         } else {
             Err(status)
         }
     }
 
-    pub fn locate_handle_buffer(&self, search_key: SearchKey) -> EfiResult<&'static [Handle]> {
-        let locate_handle_buffer = self.locate_handle_buffer;
+    pub fn locate_handle_buffer(&self, search_key: SearchKey) -> EfiResult<&[Handle]> {
+        let locate_handle_buffer = self.raw.locate_handle_buffer;
         let mut no_handles: Uint = 0;
         let mut buffer: *const Handle = 0 as _;
         let status = match search_key {
@@ -129,6 +136,18 @@ impl BootServices {
             Ok(array)
         } else {
             Err(status)
+        }
+    }
+}
+
+pub trait BootServicesFromRaw {
+    fn from_raw(raw: &'static BootServicesRaw) -> Self;
+}
+
+impl BootServicesFromRaw for BootServices {
+    fn from_raw(raw: &'static BootServicesRaw) -> Self {
+        BootServices {
+            raw: raw
         }
     }
 }
