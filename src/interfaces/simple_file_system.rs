@@ -2,10 +2,13 @@ use ::common::Guid;
 use ::common::Status;
 
 use super::EfiResult;
+use super::ProtocolImplementation;
 
 use super::file::I as File;
 
-pub const PROTOCOL: Guid =
+use core::marker::PhantomData;
+
+pub const GUID: Guid =
     Guid(0x0964e5b22, 0x6459, 0x11d2, [0x8e, 0x39, 0x0, 0xa0, 0xc9, 0x69, 0x72, 0x3b]);
 
 pub const REVISION1: u32 = 0x00010000;
@@ -32,5 +35,11 @@ impl I {
         } else {
             Err(status)
         }
+    }
+}
+
+impl ProtocolImplementation for I {
+    fn get_guid() -> (Guid, PhantomData<Self>) {
+        (GUID, PhantomData)
     }
 }

@@ -5,10 +5,13 @@ use ::common::Bool;
 use ::common::Char16;
 
 use super::EfiResult;
+use super::ProtocolImplementation;
 
 use ::tools::result;
 
-pub const PROTOCOL: Guid =
+use core::marker::PhantomData;
+
+pub const GUID: Guid =
     Guid(0x387477c1, 0x69c7, 0x11d2, [0x8e, 0x39, 0x0, 0xa0, 0xc9, 0x69, 0x72, 0x3b]);
 
 #[derive(Copy, Clone, Default)]
@@ -40,5 +43,11 @@ impl I {
     }
     pub fn get_wait_for_key(&self) -> Event {
         self.wait_for_key
+    }
+}
+
+impl ProtocolImplementation for I {
+    fn get_guid() -> (Guid, PhantomData<Self>) {
+        (GUID, PhantomData)
     }
 }

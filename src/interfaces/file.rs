@@ -1,9 +1,11 @@
 use ::common::Status;
 use ::common::Char16;
+use ::common::Uint;
 
 use super::EfiResult;
 
 use core::convert::Into;
+use core::slice;
 
 pub const REVISION1: u32 = 0x00010000;
 pub const REVISION2: u32 = 0x00020000;
@@ -25,7 +27,9 @@ pub struct I {
         /* in */ this: *const I
     ) -> Status,
     read: extern "win64" fn (
-        /* in */ this: *const I
+        /* in */ this: *const I,
+        /* in out */ buffer_size: *mut Uint,
+        /* in */ buffer: *mut ()
     ) -> Status,
     write: extern "win64" fn (
         /* in */ this: *const I
@@ -103,6 +107,21 @@ impl I {
                 &*other
             };
             Ok(other)
+        } else {
+            Err(status)
+        }
+    }
+
+    pub fn read(&self, mut buffer: &mut [u8]) -> EfiResult<Uint> {
+        let read = self.read;
+        let mut size = buffer.len() as Uint;
+        let ptr = buffer.as_mut_ptr();
+        let status = read(self as *const I, &mut size, ptr as *mut ());
+        if status == 0 {
+            buffer = unsafe {
+                slice::from_raw_parts_mut(ptr, size as usize)
+            };
+            Ok(size)
         } else {
             Err(status)
         }

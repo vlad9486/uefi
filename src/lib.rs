@@ -1,8 +1,8 @@
 #![feature(lang_items)]
 #![no_std]
 #![allow(dead_code)]
-#[macro_use]
 
+#[macro_use]
 extern crate bitflags;
 
 pub mod common;

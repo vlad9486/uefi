@@ -7,6 +7,7 @@ pub type Bool = u8;
 pub type Status = Uint;
 pub type Handle = *const ();
 pub type Event = *const ();
+pub type Registration = *const ();
 
 #[derive(Copy, Clone)]
 pub struct Guid(pub u32, pub u16, pub u16, pub [u8; 8]);
