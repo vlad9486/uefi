@@ -1,32 +1,22 @@
-mod boot_services;
-mod runtime_services;
+pub mod boot_services;
+pub mod runtime_services;
 
 use ::common::Header;
 use ::common::Handle;
 use ::common::Char16;
 use ::common::Uint;
 
+use self::boot_services::BootServices;
+use self::runtime_services::RuntimeServices;
+
 use ::interfaces::simple_input::I as SimpleInput;
 use ::interfaces::simple_text_output::I as SimpleTextOutput;
-
-pub use self::runtime_services::SIGNATURE as RUNTIME_SERVICES_SIGNATURE;
-pub use self::runtime_services::RuntimeServices;
-use self::runtime_services::RuntimeServicesRaw;
-use self::runtime_services::RuntimeServicesFromRaw;
-
-pub use self::boot_services::SIGNATURE as BOOT_SERVICES_SIGNATURE;
-pub use self::boot_services::BootServices;
-pub use self::boot_services::Tpl;
-pub use self::boot_services::SearchKey;
-use self::boot_services::BootServicesRaw;
-use self::boot_services::BootServicesFromRaw;
 
 use ::configuration_table::ConfigurationTable;
 
 use core::slice::from_raw_parts;
 
 use ::tools::EfiObject;
-use ::tools::EfiObjectFromParts;
 use ::tools::create_utf16;
 
 pub const SIGNATURE: u64 = 0x5453595320494249;
@@ -37,14 +27,14 @@ pub struct SystemTable {
     firmware_revision: u32,
 
     stdin_handle: Handle,
-    stdin: *const SimpleInput,
+    stdin: &'static SimpleInput,
     stdout_handle: Handle,
-    stdout: *const SimpleTextOutput,
+    stdout: &'static SimpleTextOutput,
     stderr_handle: Handle,
-    stderr: *const SimpleTextOutput,
+    stderr: &'static SimpleTextOutput,
 
-    runtime_services: *const RuntimeServicesRaw,
-    boot_services: *const BootServicesRaw,
+    runtime_services: &'static RuntimeServices,
+    boot_services: &'static BootServices,
 
     number_of_table_entries: Uint,
     configuration_table: *const ConfigurationTable
@@ -52,7 +42,7 @@ pub struct SystemTable {
 
 impl SystemTable {
     pub fn as_object(&'static self, handle: Handle) -> EfiObject<Self> {
-        EfiObject::from_parts(handle, &self)
+        EfiObject::from_parts(Some(handle), &self)
     }
     pub fn get_header(&self) -> Header {
         self.header
@@ -65,22 +55,20 @@ impl SystemTable {
     }
 
     pub fn get_stdin(&self) -> EfiObject<SimpleInput> {
-        EfiObject::from_parts(self.stdin_handle, unsafe { &*self.stdin })
+        EfiObject::from_parts(Some(self.stdin_handle), self.stdin)
     }
     pub fn get_stdout(&self) -> EfiObject<SimpleTextOutput> {
-        EfiObject::from_parts(self.stdout_handle, unsafe { &*self.stdout })
+        EfiObject::from_parts(Some(self.stdout_handle), self.stdout)
     }
     pub fn get_stderr(&self) -> EfiObject<SimpleTextOutput> {
-        EfiObject::from_parts(self.stderr_handle, unsafe { &*self.stderr })
+        EfiObject::from_parts(Some(self.stderr_handle), self.stderr)
     }
 
-    pub fn get_runtime_services(&self) -> RuntimeServices {
-        let raw = unsafe { &*self.runtime_services };
-        RuntimeServices::from_raw(raw)
+    pub fn get_runtime_services(&self) -> EfiObject<RuntimeServices> {
+        EfiObject::from_parts(None, self.runtime_services)
     }
-    pub fn get_boot_services(&self) -> BootServices {
-        let raw = unsafe { &*self.boot_services };
-        BootServices::from_raw(raw)
+    pub fn get_boot_services(&self) -> EfiObject<BootServices> {
+        EfiObject::from_parts(None, self.boot_services)
     }
 
     pub fn get_configuration_tables(&self) -> &[ConfigurationTable] {

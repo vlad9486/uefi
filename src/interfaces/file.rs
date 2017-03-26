@@ -1,11 +1,13 @@
 use ::common::Status;
 use ::common::Char16;
 use ::common::Uint;
+use ::common::Guid;
+use ::common::Time;
 
 use super::EfiResult;
 
 use core::convert::Into;
-use core::slice;
+use core::mem;
 
 pub const REVISION1: u32 = 0x00010000;
 pub const REVISION2: u32 = 0x00020000;
@@ -41,7 +43,10 @@ pub struct I {
         /* in */ this: *const I
     ) -> Status,
     get_info: extern "win64" fn (
-        /* in */ this: *const I
+        /* in */ this: *const I,
+        /* in */ information_type: *const Guid,
+        /* in out */ buffer_size: *mut Uint,
+        /* out */ buffer: *mut ()
     ) -> Status,
     set_info: extern "win64" fn (
         /* in */ this: *const I
@@ -63,6 +68,45 @@ pub struct I {
     flush_ex: extern "win64" fn (
         /* in */ this: *const I
     ) -> Status,
+}
+
+const FILE_INFO: Guid =
+    Guid(0x09576e92, 0x6d3f, 0x11d2, [0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b]);
+
+const MAX_FILE_NAME_SIZE: usize = 64;
+
+#[repr(C)]
+struct FileInfoRaw {
+    size: u64,
+    file_size: u64,
+    physical_size: u64,
+    create_time: Time,
+    last_access_time: Time,
+    modification_time: Time,
+    attributes: Attributes,
+    file_name: [Char16; MAX_FILE_NAME_SIZE]
+}
+
+pub struct FileInfo {
+    pub size: u64,
+    pub physical_size: u64,
+    pub create_time: Time,
+    pub last_access_time: Time,
+    pub modification_time: Time,
+    pub name: &'static str
+}
+
+impl Into<FileInfo> for FileInfoRaw {
+    fn into(self) -> FileInfo {
+        FileInfo {
+            size: self.file_size,
+            physical_size: self.physical_size,
+            create_time: self.create_time.clone(),
+            last_access_time: self.last_access_time.clone(),
+            modification_time: self.modification_time.clone(),
+            name: "unimplemented"
+        }
+    }
 }
 
 #[derive(Copy, Clone)]
@@ -118,10 +162,28 @@ impl I {
         let ptr = buffer.as_mut_ptr();
         let status = read(self as *const I, &mut size, ptr as *mut ());
         if status == 0 {
-            buffer = unsafe {
-                slice::from_raw_parts_mut(ptr, size as usize)
-            };
             Ok(size)
+        } else {
+            Err(status)
+        }
+    }
+
+    pub fn get_file_info(&self) -> EfiResult<FileInfo> {
+        let get_info = self.get_info;
+        let mut size = mem::size_of::<FileInfoRaw>() as u64;
+        let mut file_info = FileInfoRaw {
+            size: size,
+            file_size: 0,
+            physical_size: 0,
+            create_time: Time::default(),
+            last_access_time: Time::default(),
+            modification_time: Time::default(),
+            attributes: READ_ONLY,
+            file_name: [0; MAX_FILE_NAME_SIZE]
+        };
+        let status = get_info(self as *const I, &FILE_INFO, &mut size, unsafe { mem::transmute(&mut file_info) });
+        if status == 0 {
+            Ok(file_info.into())
         } else {
             Err(status)
         }

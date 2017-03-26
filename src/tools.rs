@@ -7,7 +7,7 @@ use core::ops::Deref;
 use core::slice::from_raw_parts;
 
 pub struct EfiObject<T> where T: 'static {
-    handle: Handle,
+    handle: Option<Handle>,
     implementation: &'static T
 }
 
@@ -20,17 +20,11 @@ impl<T> Deref for EfiObject<T> where T: 'static {
 }
 
 impl<T> EfiObject<T> where T: 'static {
-    pub fn get_handle(&self) -> Handle {
+    pub fn get_handle(&self) -> Option<Handle> {
         self.handle
     }
-}
 
-pub trait EfiObjectFromParts<T> where T: 'static {
-    fn from_parts(handle: Handle, implementation: &'static T) -> Self;
-}
-
-impl<T> EfiObjectFromParts<T> for EfiObject<T> where T: 'static {
-    fn from_parts(handle: Handle, implementation: &'static T) -> Self {
+    pub fn from_parts(handle: Option<Handle>, implementation: &'static T) -> Self {
         EfiObject {
             handle: handle,
             implementation: implementation

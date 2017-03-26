@@ -67,7 +67,7 @@ pub struct I {
         /* in */ enable: Bool
     ) -> Status,
 
-    mode: *const SimpleTextOutputMode
+    mode: &'static SimpleTextOutputMode
 }
 
 impl I {
@@ -124,9 +124,7 @@ impl I {
     }
 
     pub fn get_mode(&self) -> SimpleTextOutputMode {
-        unsafe {
-            *self.mode
-        }
+        *self.mode
     }
 }
 
