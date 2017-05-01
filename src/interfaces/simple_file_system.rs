@@ -13,6 +13,7 @@ pub const GUID: Guid =
 
 pub const REVISION1: u32 = 0x00010000;
 
+#[repr(C)]
 pub struct I {
     revision: u64,
 

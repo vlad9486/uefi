@@ -15,6 +15,7 @@ const SMBIOS_TABLE_GUID: Guid =
 const SAL_SYSTEM_TABLE_GUID: Guid =
     Guid(0xeb9d2d32, 0x2d88, 0x11d3, [0x9a, 0x16, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d]);
 
+#[repr(C)]
 #[derive(Copy, Clone)]
 pub struct ConfigurationTable {
     pub vendor_guid: Guid,

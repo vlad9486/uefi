@@ -2,6 +2,7 @@ use ::common::Header;
 
 pub const SIGNATURE: u64 = 0x56524553544e5552;
 
+#[repr(C)]
 pub struct RuntimeServices {
     header: Header,
 

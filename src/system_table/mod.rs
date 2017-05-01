@@ -21,6 +21,7 @@ use ::tools::create_utf16;
 
 pub const SIGNATURE: u64 = 0x5453595320494249;
 
+#[repr(C)]
 pub struct SystemTable {
     header: Header,
     firmware_vendor: *const Char16,

@@ -14,6 +14,7 @@ use core::marker::PhantomData;
 pub const GUID: Guid =
     Guid(0x387477c1, 0x69c7, 0x11d2, [0x8e, 0x39, 0x0, 0xa0, 0xc9, 0x69, 0x72, 0x3b]);
 
+#[repr(C)]
 #[derive(Copy, Clone, Default)]
 pub struct InputKey {
     pub scan_code: u16,

@@ -8,9 +8,11 @@ pub type Handle = *const ();
 pub type Event = *const ();
 pub type Registration = *const ();
 
+#[repr(C)]
 #[derive(Copy, Clone)]
 pub struct Guid(pub u32, pub u16, pub u16, pub [u8; 8]);
 
+#[repr(C)]
 #[derive(Copy, Clone)]
 pub struct Header {
     pub signature: u64,

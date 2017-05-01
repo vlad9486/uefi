@@ -15,6 +15,7 @@ use core::slice;
 
 pub const SIGNATURE: u64 = 0x56524553544f4f42;
 
+#[repr(C)]
 pub struct BootServices {
     header: Header,
 
