@@ -13,9 +13,9 @@ use ::system_table::boot_services::MemoryType;
 pub struct DynamicArray<'a, T> where T: Sized + Clone {
     boot_services: &'a BootServices,
     pub ptr: PhysicalAddress,
-    pages: Uint,
-    size_of_entry: Uint,
-    number_of_entries: Uint,
+    pub pages: Uint,
+    pub size_of_entry: Uint,
+    pub number_of_entries: Uint,
     phantom_data: PhantomData<T>
 }
 

@@ -189,4 +189,14 @@ impl I {
             Err(status)
         }
     }
+
+    pub fn close(&self) -> EfiResult<()> {
+        let close = self.close;
+        let status = close(self as *const I);
+        if status == 0 {
+            Ok(())
+        } else {
+            Err(status)
+        }
+    }
 }

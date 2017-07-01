@@ -42,8 +42,8 @@ pub struct SystemTable {
 }
 
 impl SystemTable {
-    pub fn as_object(&'static self, handle: Handle) -> EfiObject<Self> {
-        EfiObject::from_parts(Some(handle), &self)
+    pub fn as_object(&'static self) -> EfiObject<Self> {
+        EfiObject::from_parts(None, &self)
     }
     pub fn get_header(&self) -> Header {
         self.header

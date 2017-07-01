@@ -38,7 +38,7 @@ pub struct BootServices {
     ) -> Status,
     get_memory_map: extern "win64" fn (
         /* in out */ memory_map_size: *mut Uint,
-        /* in out */ memory_map: *mut MemoryDescriptor,
+        /* in out */ memory_map: *mut MemoryDescriptorRaw,
         /* out */ map_key: *mut Uint,
         /* out */ descriptor_size: *mut Uint,
         /* out */ descriptor_version: *mut u32
@@ -71,7 +71,10 @@ pub struct BootServices {
     start_image: extern "win64" fn () -> (),
     exit: extern "win64" fn () -> (),
     unload_image: extern "win64" fn () -> (),
-    exit_boot_services: extern "win64" fn () -> (),
+    exit_boot_services: extern "win64" fn (
+        /* in */ handle: Handle,
+        /* in */ map_key: Uint
+    ) -> Status,
 
     get_next_monotonic_count: extern "win64" fn () -> (),
     stall: extern "win64" fn () -> (),
@@ -153,7 +156,8 @@ pub struct PhysicalAddress(pub u64);
 pub struct VirtualAddress(pub u64);
 
 #[repr(C)]
-struct MemoryDescriptorRaw {
+#[derive(Copy, Clone)]
+pub struct MemoryDescriptorRaw {
     memory_type: u32,
     physical_start: u64,
     virtual_start: u64,
@@ -161,7 +165,6 @@ struct MemoryDescriptorRaw {
     attribute: u64
 }
 
-#[derive(Copy, Clone)]
 pub struct MemoryDescriptor {
     pub memory_type: MemoryType,
     pub physical_start: PhysicalAddress,
@@ -171,7 +174,7 @@ pub struct MemoryDescriptor {
 }
 
 pub struct MemoryDescriptorArray<'a> {
-    pub array: DynamicArray<'a, MemoryDescriptor>,
+    pub array: DynamicArray<'a, MemoryDescriptorRaw>,
     pub key: Uint,
     pub descriptor_version: u32
 }
@@ -226,12 +229,11 @@ impl BootServices {
         let mut key = 0 as _;
         let mut size = 0 as _;
         let mut version = 0 as _;
-        let _ = get_memory_map(&mut map_size, 0 as *mut MemoryDescriptor, &mut key, &mut size, &mut version);
-        map_size = map_size + size;
+        let _ = get_memory_map(&mut map_size, 0 as *mut MemoryDescriptorRaw, &mut key, &mut size, &mut version);
         match DynamicArray::new(self, size, (map_size / size)) {
             Ok(array) => {
                 let PhysicalAddress(ptr) = array.ptr;
-                let status = get_memory_map(&mut map_size, ptr as *mut MemoryDescriptor, &mut key, &mut size, &mut version);
+                let status = get_memory_map(&mut map_size, ptr as *mut MemoryDescriptorRaw, &mut key, &mut size, &mut version);
                 if status == 0 {
                     Ok(MemoryDescriptorArray {
                         array: array,
@@ -275,6 +277,17 @@ impl BootServices {
                 slice::from_raw_parts(buffer, no_handles as usize)
             };
             Ok(array)
+        } else {
+            Err(status)
+        }
+    }
+
+    pub fn exit_boot_services(&self, handle: Handle, map_key: Uint) -> EfiResult<()> {
+        let exit_boot_services = self.exit_boot_services;
+        let status = exit_boot_services(handle, map_key);
+        // Boo
+        if status == 0 {
+            Ok(())
         } else {
             Err(status)
         }
