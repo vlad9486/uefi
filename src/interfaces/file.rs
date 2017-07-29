@@ -131,13 +131,13 @@ impl Into<u64> for OpenMode {
 }
 
 bitflags! {
-    pub flags Attributes: u64 {
-        const READ_ONLY = 1 << 0,
-        const HIDDEN    = 1 << 1,
-        const SYSTEM    = 1 << 2,
-        const RESERVED  = 1 << 3,
-        const DIRECTORY = 1 << 4,
-        const ARCHIVE   = 1 << 5
+    pub struct Attributes: u64 {
+        const READ_ONLY = 1 << 0;
+        const HIDDEN    = 1 << 1;
+        const SYSTEM    = 1 << 2;
+        const RESERVED  = 1 << 3;
+        const DIRECTORY = 1 << 4;
+        const ARCHIVE   = 1 << 5;
     }
 }
 

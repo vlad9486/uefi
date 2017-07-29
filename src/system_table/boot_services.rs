@@ -180,19 +180,19 @@ pub struct MemoryDescriptorArray<'a> {
 }
 
 bitflags! {
-    pub flags MemoryAttributes: u64 {
-        const MEMORY_UC            = 1 << 0,
-        const MEMORY_WC            = 1 << 1,
-        const MEMORY_WT            = 1 << 2,
-        const MEMORY_WB            = 1 << 3,
-        const MEMORY_UCE           = 1 << 4,
-        const MEMORY_WP            = 1 << 12,
-        const MEMORY_RP            = 1 << 13,
-        const MEMORY_XP            = 1 << 14,
-        const MEMORY_NV            = 1 << 15,
-        const MEMORY_MORE_RELIABLE = 1 << 16,
-        const MEMORY_RO            = 1 << 17,
-        const MEMORY_RUNTIME       = 1 << 63,
+    pub struct MemoryAttributes: u64 {
+        const MEMORY_UC            = 1 << 0;
+        const MEMORY_WC            = 1 << 1;
+        const MEMORY_WT            = 1 << 2;
+        const MEMORY_WB            = 1 << 3;
+        const MEMORY_UCE           = 1 << 4;
+        const MEMORY_WP            = 1 << 12;
+        const MEMORY_RP            = 1 << 13;
+        const MEMORY_XP            = 1 << 14;
+        const MEMORY_NV            = 1 << 15;
+        const MEMORY_MORE_RELIABLE = 1 << 16;
+        const MEMORY_RO            = 1 << 17;
+        const MEMORY_RUNTIME       = 1 << 63;
     }
 }
 
