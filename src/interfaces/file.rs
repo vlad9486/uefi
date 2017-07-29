@@ -171,7 +171,7 @@ impl I {
 
     pub fn get_file_info(&self) -> EfiResult<FileInfo> {
         let get_info = self.get_info;
-        let mut size = mem::size_of::<FileInfoRaw>() as u64;
+        let size = mem::size_of::<FileInfoRaw>() as u64;
         let mut file_info = FileInfoRaw {
             size: size,
             file_size: 0,
@@ -182,7 +182,7 @@ impl I {
             attributes: READ_ONLY,
             file_name: [0; MAX_FILE_NAME_SIZE]
         };
-        let status = get_info(self as *const I, &FILE_INFO, &mut size, unsafe { mem::transmute(&mut file_info) });
+        let status = get_info(self as *const I, &FILE_INFO, &mut (size as _), unsafe { mem::transmute(&mut file_info) });
         if status == 0 {
             Ok(file_info.into())
         } else {

@@ -1,5 +1,4 @@
-// FIXME
-pub type Uint = u64;
+pub type Uint = usize;
 pub type Char16 = u16;
 pub type Bool = u8;
 

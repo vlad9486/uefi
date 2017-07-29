@@ -6,12 +6,12 @@ use ::interfaces::EfiResult;
 use core::ops::Deref;
 use core::slice::from_raw_parts;
 
-pub struct EfiObject<T> where T: 'static {
+pub struct EfiObject<'a, T> where T: 'static {
     handle: Option<Handle>,
-    implementation: &'static T
+    implementation: &'a T
 }
 
-impl<T> Deref for EfiObject<T> where T: 'static {
+impl<'a, T> Deref for EfiObject<'a, T> where T: 'static {
     type Target = T;
 
     fn deref(&self) -> &T {
@@ -19,12 +19,12 @@ impl<T> Deref for EfiObject<T> where T: 'static {
     }
 }
 
-impl<T> EfiObject<T> where T: 'static {
+impl<'a, T> EfiObject<'a, T> where T: 'static {
     pub fn get_handle(&self) -> Option<Handle> {
         self.handle
     }
 
-    pub fn from_parts(handle: Option<Handle>, implementation: &'static T) -> Self {
+    pub fn from_parts(handle: Option<Handle>, implementation: &'a T) -> Self {
         EfiObject {
             handle: handle,
             implementation: implementation
