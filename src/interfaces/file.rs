@@ -157,7 +157,7 @@ impl I {
         }
     }
 
-    pub fn read(&self, mut buffer: &mut [u8]) -> EfiResult<Uint> {
+    pub fn read(&self, buffer: &mut [u8]) -> EfiResult<Uint> {
         let read = self.read;
         let mut size = buffer.len() as Uint;
         let ptr = buffer.as_mut_ptr();
@@ -179,7 +179,7 @@ impl I {
             create_time: Time::default(),
             last_access_time: Time::default(),
             modification_time: Time::default(),
-            attributes: READ_ONLY,
+            attributes: Attributes::READ_ONLY,
             file_name: [0; MAX_FILE_NAME_SIZE]
         };
         let status = get_info(self as *const I, &FILE_INFO, &mut (size as _), unsafe { mem::transmute(&mut file_info) });

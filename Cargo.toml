@@ -8,7 +8,7 @@ name = "uefi"
 crate-type = ["rlib"]
 
 [dependencies]
-bitflags = "*"
+bitflags = "1.0.0"
 
 # The development profile, used for `cargo build`.
 # [profile.dev]
