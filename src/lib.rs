@@ -1,6 +1,5 @@
-#![feature(lang_items)]
 #![no_std]
-#![allow(dead_code)]
+#![feature(nonzero)]
 
 #[macro_use]
 extern crate bitflags;

@@ -9,7 +9,8 @@ use ::interfaces::EfiResult;
 use ::interfaces::ProtocolImplementation;
 
 use ::tools::EfiObject;
-use ::dynamic_array::DynamicArray;
+use ::dynamic_array::DynamicArrayStride;
+use ::dynamic_array::Array;
 
 use core::slice;
 
@@ -174,7 +175,7 @@ pub struct MemoryDescriptor {
 }
 
 pub struct MemoryDescriptorArray<'a> {
-    pub array: DynamicArray<'a, MemoryDescriptorRaw>,
+    pub array: DynamicArrayStride<'a, MemoryDescriptorRaw>,
     pub key: Uint,
     pub descriptor_version: u32
 }
@@ -230,9 +231,9 @@ impl BootServices {
         let mut size = 0 as _;
         let mut version = 0 as _;
         let _ = get_memory_map(&mut map_size, 0 as *mut MemoryDescriptorRaw, &mut key, &mut size, &mut version);
-        match DynamicArray::new(self, size, (map_size / size)) {
+        match DynamicArrayStride::new(self, size, (map_size / size)) {
             Ok(array) => {
-                let PhysicalAddress(ptr) = array.ptr;
+                let PhysicalAddress(ptr) = array.physical_address();
                 let status = get_memory_map(&mut map_size, ptr as *mut MemoryDescriptorRaw, &mut key, &mut size, &mut version);
                 if status == 0 {
                     Ok(MemoryDescriptorArray {
