@@ -31,6 +31,10 @@ pub struct Status {
 }
 
 impl Status {
+    pub const NULL: Self = Status { raw: 0 };
+}
+
+impl Status {
     pub fn check<T>(self, value: T) -> Result<T, Self> {
         if self.raw == 0 {
             Ok(value)
