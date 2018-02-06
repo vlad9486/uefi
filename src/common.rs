@@ -1,40 +1,101 @@
-pub type Uint = usize;
+pub type Word = usize;
 pub type Char16 = u16;
 pub type Bool = u8;
 
-pub type Status = Uint;
-pub type Handle = *const ();
-pub type Event = *const ();
-pub type Registration = *const ();
+#[repr(C)]
+#[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
+pub struct Handle {
+    raw: Word,
+}
 
 #[repr(C)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
+pub struct Event {
+    raw: Word,
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
+pub struct Registration {
+    raw: Word,
+}
+
+impl Registration {
+    pub const NULL: Self = Registration { raw: 0 };
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, Eq, PartialEq)]
+pub struct Status {
+    pub raw: Word,
+}
+
+impl Status {
+    pub fn check<T>(self, value: T) -> Result<T, Self> {
+        if self.raw == 0 {
+            Ok(value)
+        } else {
+            Err(self)
+        }
+    }
+
+    pub fn check_map<T, F>(self, op: F) -> Result<T, Self>
+    where
+        F: FnOnce() -> T,
+    {
+        if self.raw == 0 {
+            Ok(op())
+        } else {
+            Err(self)
+        }
+    }
+
+    pub fn check_flat_map<T, F>(self, op: F) -> Result<T, Self>
+    where
+        F: FnOnce() -> Result<T, Self>,
+    {
+        if self.raw == 0 {
+            op()
+        } else {
+            Err(self)
+        }
+    }
+}
+
+#[repr(C)]
+#[derive(Copy, Clone, Eq, PartialEq)]
 pub struct Guid(pub u32, pub u16, pub u16, pub [u8; 8]);
 
 #[repr(C)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Eq, PartialEq)]
 pub struct Header {
     pub signature: u64,
     pub revision: u32,
     pub size: u32,
     pub crc32: u32,
-    pub reserved: u32
+    _reserved: u32,
 }
 
-pub const PAGE_SIZE: Uint = 0x1000;
+pub const PAGE_SIZE: Word = 0x1000;
+
+pub trait HasGuid {
+    const GUID: Guid;
+}
 
 #[repr(C)]
-#[derive(Default, Clone)]
-pub struct Time {
-    year: u16, // 1900 – 9999
-    month: u8, // 1 – 12
-    day: u8, // 1 – 31
-    hour: u8, // 0 – 23
-    minute: u8, // 0 – 59
-    second: u8, // 0 – 59
-    pad1: u8,
-    nanosecond: u32, // 0 – 999,999,999
-    time_zone: i16, // -1440 to 1440 or 2047
-    day_light: u8,
-    pad2: u8
+#[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
+pub struct Address {
+    // maybe usize
+    raw: u64,
+}
+
+impl Address {
+    pub const NULL: Self = Address { raw: 0 };
+
+    pub unsafe fn cast<T>(self) -> *mut T
+    where
+        T: Sized,
+    {
+        self.raw as _
+    }
 }
