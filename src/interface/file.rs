@@ -47,12 +47,12 @@ pub struct File {
 const _REVISION1: u32 = 0x00010000;
 const _REVISION2: u32 = 0x00020000;
 
-#[derive(Copy, Clone)]
-#[repr(u64)]
-pub enum OpenMode {
-    Read,
-    ReadWrite,
-    CreateReadWrite,
+bitflags! {
+    pub struct OpenMode: u64 {
+        const READ = 1 << 0;
+        const WRITE = 1 << 1;
+        const CREATE = 1 << 63;
+    }
 }
 
 bitflags! {
@@ -160,7 +160,7 @@ impl File {
         let open = self.open;
         let mut other: *const File = ptr::null_mut();
         let c_str = file_name.as_ptr();
-        open(self, &mut other, c_str, open_mode as _, attributes.bits()).check(unsafe { &*other })
+        open(self, &mut other, c_str, open_mode.bits(), attributes.bits()).check(unsafe { &*other })
     }
     pub fn close(&self) -> Result<(), Status> {
         assert!(self.revision as u32 >= _REVISION1);
