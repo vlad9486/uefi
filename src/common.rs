@@ -105,10 +105,8 @@ impl Address {
 
     pub unsafe fn from_raw<T>(raw: *mut T) -> Self
     where
-        T: Sized
+        T: Sized,
     {
-        Address {
-            raw: raw as _,
-        }
+        Address { raw: raw as _ }
     }
 }
