@@ -23,7 +23,7 @@ use core::ops::Try;
 use core::option::NoneError;
 
 /// Tools
-trait BootServicesEx {
+pub trait BootServicesEx {
     fn find_file(&self, filename: &[Char16], open_mode: OpenMode, attributes: Attributes) -> Result<&File, NoneError>;
     fn alloc<T: Sized>(&self, length: usize, memory_type: MemoryType) -> Result<Array<T>, Status>;
     fn free<T: Sized>(&self, array: Array<T>) -> Result<(), Status>;
