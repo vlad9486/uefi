@@ -58,7 +58,7 @@ impl BootServicesEx for BootServices {
 
         let address = unsafe {
             let mut array = array;
-            Address::from_raw(array.as_slice_mut().as_mut_ptr())
+            Address::from_raw(array.as_mut_slice().as_mut_ptr())
         };
 
         self.free_pages(address, pages)

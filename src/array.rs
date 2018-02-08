@@ -102,7 +102,7 @@ where
         }
     }
 
-    pub fn as_slice_mut(&mut self) -> &mut [T] {
+    pub fn as_mut_slice(&mut self) -> &mut [T] {
         unsafe {
             slice::from_raw_parts_mut(self.raw.get(), self.length * mem::size_of::<T>())
         }
