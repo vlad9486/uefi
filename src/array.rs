@@ -6,6 +6,9 @@ use core::ops::IndexMut;
 use core::convert::AsRef;
 use core::convert::AsMut;
 
+use core::slice;
+use core::mem;
+
 use common::Word;
 
 #[repr(C)]
@@ -84,6 +87,25 @@ where
 {
     pub fn length(&self) -> Word {
         self.length
+    }
+
+    pub unsafe fn from_raw(raw: *mut T, length: Word) -> Self {
+        Array {
+            length: length,
+            raw: NonZero::new_unchecked(raw),
+        }
+    }
+
+    pub fn as_slice(&self) -> &[T] {
+        unsafe {
+            slice::from_raw_parts(self.raw.get(), self.length * mem::size_of::<T>())
+        }
+    }
+
+    pub fn as_slice_mut(&mut self) -> &mut [T] {
+        unsafe {
+            slice::from_raw_parts_mut(self.raw.get(), self.length * mem::size_of::<T>())
+        }
     }
 }
 

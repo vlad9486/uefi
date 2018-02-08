@@ -102,4 +102,13 @@ impl Address {
     {
         self.raw as _
     }
+
+    pub unsafe fn from_raw<T>(raw: *mut T) -> Self
+    where
+        T: Sized
+    {
+        Address {
+            raw: raw as _,
+        }
+    }
 }
