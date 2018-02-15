@@ -85,15 +85,15 @@ impl<T> Array<T>
 where
     T: Sized,
 {
-    pub fn length(&self) -> Word {
-        self.length
-    }
-
     pub unsafe fn from_raw(raw: *mut T, length: Word) -> Self {
         Array {
             length: length,
             raw: NonZero::new_unchecked(raw),
         }
+    }
+
+    pub fn length(&self) -> Word {
+        self.length
     }
 
     pub fn as_slice(&self) -> &[T] {
@@ -152,5 +152,17 @@ where
 
     pub fn length(&self) -> Word {
         self.length
+    }
+
+    pub fn stride(&self) -> Word {
+        self.stride
+    }
+
+    pub fn as_ptr(&self) -> *const T {
+        self.raw.get()
+    }
+
+    pub fn as_mut_ptr(&self) -> *mut T {
+        self.raw.get()
     }
 }
