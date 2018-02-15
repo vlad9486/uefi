@@ -208,35 +208,35 @@ impl BootServices {
         let mut stride = 0 as _;
         let mut version = 0 as _;
 
-        get_memory_map(
+        let _ = get_memory_map(
             &mut map_size,
             0 as *mut MemoryDescriptor,
             &mut key,
             &mut stride,
             &mut version,
-        ).check_flat_map(|| {
-            let length = map_size / stride;
-            assert_eq!(map_size % stride, 0);
-            let pages = map_size / PAGE_SIZE + 1;
+        ).check(());
 
-            let address = self.allocate_pages(
-                AllocateType::AllocateAnyPages,
-                MemoryType::LoaderData,
-                pages,
-            )?;
-            let array = unsafe { ArrayStride::from_raw(address.cast(), length, stride) };
+        let length = map_size / stride;
+        assert_eq!(map_size % stride, 0);
+        let pages = map_size / PAGE_SIZE + 1;
 
-            get_memory_map(
-                &mut map_size,
-                unsafe { address.cast() },
-                &mut key,
-                &mut stride,
-                &mut version,
-            ).check(MemoryDescriptorArray {
-                array: array,
-                key: key,
-                descriptor_version: version,
-            })
+        let address = self.allocate_pages(
+            AllocateType::AllocateAnyPages,
+            MemoryType::LoaderData,
+            pages,
+        )?;
+        let array: ArrayStride<MemoryDescriptor> = unsafe { ArrayStride::from_raw(address.cast(), length, stride) };
+
+        get_memory_map(
+            &mut map_size,
+            unsafe { address.cast() },
+            &mut key,
+            &mut stride,
+            &mut version,
+        ).check(MemoryDescriptorArray {
+            array: array,
+            key: key,
+            descriptor_version: version,
         })
     }
 
