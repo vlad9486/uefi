@@ -1,4 +1,4 @@
-use core::nonzero::NonZero;
+use core::ptr::NonNull;
 
 use core::ops::Index;
 use core::ops::IndexMut;
@@ -17,7 +17,7 @@ pub struct Pointer<T>
 where
     T: Sized,
 {
-    raw: NonZero<*mut T>,
+    raw: NonNull<T>,
 }
 
 impl<T> AsRef<T> for Pointer<T>
@@ -25,7 +25,7 @@ where
     T: Sized,
 {
     fn as_ref(&self) -> &T {
-        unsafe { &*self.raw.get() }
+        unsafe { self.raw.as_ref() }
     }
 }
 
@@ -34,7 +34,7 @@ where
     T: Sized,
 {
     fn as_mut(&mut self) -> &mut T {
-        unsafe { &mut *self.raw.get() }
+        unsafe { self.raw.as_mut() }
     }
 }
 
@@ -44,7 +44,7 @@ where
 {
     pub unsafe fn from_raw(raw: *mut T) -> Self {
         Pointer {
-            raw: NonZero::new_unchecked(raw),
+            raw: NonNull::new_unchecked(raw),
         }
     }
 }
@@ -56,7 +56,7 @@ where
     T: Sized,
 {
     length: Word,
-    raw: NonZero<*mut T>,
+    raw: NonNull<T>,
 }
 
 impl<T> Index<Word> for Array<T>
@@ -67,7 +67,7 @@ where
 
     fn index(&self, index: Word) -> &Self::Output {
         let index = if index < self.length { index } else { 0 };
-        unsafe { &*self.raw.get().offset(index as _) }
+        unsafe { &*self.raw.as_ptr().offset(index as _) }
     }
 }
 
@@ -77,7 +77,7 @@ where
 {
     fn index_mut(&mut self, index: Word) -> &mut Self::Output {
         let index = if index < self.length { index } else { 0 };
-        unsafe { &mut *self.raw.get().offset(index as _) }
+        unsafe { &mut *self.raw.as_ptr().offset(index as _) }
     }
 }
 
@@ -88,7 +88,7 @@ where
     pub unsafe fn from_raw(raw: *mut T, length: Word) -> Self {
         Array {
             length: length,
-            raw: NonZero::new_unchecked(raw),
+            raw: NonNull::new_unchecked(raw),
         }
     }
 
@@ -97,11 +97,11 @@ where
     }
 
     pub fn as_slice(&self) -> &[T] {
-        unsafe { slice::from_raw_parts(self.raw.get(), self.length * mem::size_of::<T>()) }
+        unsafe { slice::from_raw_parts(self.raw.as_ref(), self.length * mem::size_of::<T>()) }
     }
 
     pub fn as_mut_slice(&mut self) -> &mut [T] {
-        unsafe { slice::from_raw_parts_mut(self.raw.get(), self.length * mem::size_of::<T>()) }
+        unsafe { slice::from_raw_parts_mut(self.raw.as_mut(), self.length * mem::size_of::<T>()) }
     }
 }
 
@@ -113,7 +113,7 @@ where
 {
     length: Word,
     stride: Word,
-    raw: NonZero<*mut T>,
+    raw: NonNull<T>,
 }
 
 impl<T> Index<Word> for ArrayStride<T>
@@ -124,7 +124,7 @@ where
 
     fn index(&self, index: Word) -> &Self::Output {
         let index = if index < self.length { index } else { 0 };
-        unsafe { &*((self.raw.get() as *mut u8).offset((index * self.stride) as _) as *mut T) }
+        unsafe { &*((self.raw.as_ptr() as *mut u8).offset((index * self.stride) as _) as *mut T) }
     }
 }
 
@@ -134,7 +134,7 @@ where
 {
     fn index_mut(&mut self, index: Word) -> &mut Self::Output {
         let index = if index < self.length { index } else { 0 };
-        unsafe { &mut *((self.raw.get() as *mut u8).offset((index * self.stride) as _) as *mut T) }
+        unsafe { &mut *((self.raw.as_ptr() as *mut u8).offset((index * self.stride) as _) as *mut T) }
     }
 }
 
@@ -146,7 +146,7 @@ where
         ArrayStride {
             length: length,
             stride: stride,
-            raw: NonZero::new_unchecked(raw),
+            raw: NonNull::new_unchecked(raw),
         }
     }
 
@@ -159,10 +159,10 @@ where
     }
 
     pub fn as_ptr(&self) -> *const T {
-        self.raw.get()
+        self.raw.as_ptr()
     }
 
     pub fn as_mut_ptr(&self) -> *mut T {
-        self.raw.get()
+        self.raw.as_ptr()
     }
 }

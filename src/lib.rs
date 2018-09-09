@@ -1,6 +1,5 @@
 #![no_std]
 #![feature(try_trait)]
-#![feature(nonzero)]
 
 #[macro_use]
 extern crate bitflags;
