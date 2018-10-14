@@ -22,9 +22,9 @@ pub struct SystemTable<'a> {
     stdin_handle: Handle,
     stdin: &'a SimpleInput,
     stdout_handle: Handle,
-    stdout: &'a SimpleTextOutput,
+    stdout: &'a mut SimpleTextOutput,
     stderr_handle: Handle,
-    stderr: &'a SimpleTextOutput,
+    stderr: &'a mut SimpleTextOutput,
 
     runtime_services: &'a RuntimeServices,
     boot_services: &'a BootServices,
@@ -55,11 +55,11 @@ impl<'a> SystemTable<'a> {
         self.stdin
     }
 
-    pub fn stdout(&self) -> &SimpleTextOutput {
+    pub fn stdout(&mut self) -> &mut SimpleTextOutput {
         self.stdout
     }
 
-    pub fn stderr(&self) -> &SimpleTextOutput {
+    pub fn stderr(&mut self) -> &mut SimpleTextOutput {
         self.stderr
     }
 

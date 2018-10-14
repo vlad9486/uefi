@@ -8,6 +8,39 @@ use common::HasGuid;
 
 use array::Pointer;
 
+use core::fmt;
+
+impl fmt::Write for SimpleTextOutput {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        // warning, only ascii allowed
+        const SIZE: usize = 0x50;
+        let mut buffer = [0u16; SIZE + 1];
+        let bytes = s.as_bytes();
+
+        let count = bytes.len() / SIZE;
+        for i in 0..count {
+            let bytes = &bytes[(i * SIZE)..((i + 1) * SIZE)];
+            for j in 0..SIZE {
+                buffer[j] = bytes[j] as u16;
+            }
+            buffer[SIZE] = 0;
+            self.output_string(&buffer[..]).map_err(|_| fmt::Error)?;
+        }
+
+        let remainder = bytes.len() % SIZE;
+        if remainder != 0 {
+            let bytes = &bytes[(count * SIZE)..];
+            for j in 0..remainder {
+                buffer[j] = bytes[j] as u16;
+            }
+            buffer[remainder] = 0;
+            self.output_string(&buffer[..]).map_err(|_| fmt::Error)?;
+        }
+
+        Ok(())
+    }
+}
+
 #[repr(C)]
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct SimpleTextOutputMode {
